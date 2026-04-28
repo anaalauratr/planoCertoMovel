@@ -18,6 +18,7 @@ class TelaTres extends StatefulWidget {
 class _TelaTresState extends State<TelaTres> {
   void alterarSenha(
     BuildContext context,
+    //alert para mostrar que o botao de alterar senha foi clicado
   ) {
     showDialog(
       context: context,
@@ -55,37 +56,41 @@ class _TelaTresState extends State<TelaTres> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
+          //cria outro app bar em baixo do padrao mostrando que esta no seu perfil
           Internacionalizacao.titulo1,
           style: EstilosTextosCustomizado.formField(context),
         ),
       ),
       body: Column(
-        crossAxisAlignment: CrossAxisAlignment.center, //centraliza horizontal
+        crossAxisAlignment: CrossAxisAlignment.center,
+        //centraliza horizontalmente no centro
         children: [
-          const SizedBox(height: 35),
-          const Icon(
+          SizedBox(height: 35),
+          Icon(
+            //icone de pessoa demosntrando que esta em perfil
             Icons.person,
             size: 60,
             color: Color(0xFF95B634),
           ),
-          const SizedBox(height: 15),
-          const Column(
+          SizedBox(height: 15),
+          Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Text(
-                "Ana Laura - sexo: feminino",
+                "Ana Laura - sexo: feminino", //nome da pessoa e sexo
                 style: TextStyle(
                   color: Color(0xFF95B634),
                   fontSize: 18,
                 ),
                 softWrap: true,
-              ), // pode quebrar linha
+              ), // pode quebrar linha se for texto dms q n cabe na tela
             ],
           ),
-          const SizedBox(height: 35),
-          const Row(
+          SizedBox(height: 35),
+          Row(
+            //crio uma linha com duas colunas para uma ficar na frente da outra
             children: [
-              SizedBox(width: 40),
+              SizedBox(width: 40), //espaco horizontal da margem
               Column(
                 children: [
                   Icon(Icons.email),
@@ -94,6 +99,7 @@ class _TelaTresState extends State<TelaTres> {
               ),
               SizedBox(width: 30),
               Column(
+                //dx os elementos um em baixo do outro
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text("Email"),
@@ -118,6 +124,7 @@ class _TelaTresState extends State<TelaTres> {
               SizedBox(width: 30),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
+                //alinhamento horizontal a esquerda
                 children: [
                   Text("Data de Nascimento"),
                   Text(
@@ -186,9 +193,10 @@ class _TelaTresState extends State<TelaTres> {
               ),
               SizedBox(width: 30),
               Expanded(
+                //faz ocupar todelo espaco disponil
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  //geralmente objetivo pode vir escriyo mt coisa por isso o expanded
+                  //geralmente objetivo pode vir escriyo mt coisa por isso o expanded para ocuṕar o maximo que der, mas se n caber na tela pd quebrar linha
                   children: [
                     Text("Objetivo"),
                     Text(
@@ -209,9 +217,11 @@ class _TelaTresState extends State<TelaTres> {
               backgroundColor: Theme.of(context).primaryColorLight,
             ),
             onPressed: () {
-              alterarSenha(context);
+              alterarSenha(
+                  context); //qnd clicar chamo a funcao alterar senha que exibo o alert
             },
             child: Text(
+              //texto do botao
               "Alterar senha",
               style: TextStyle(color: Colors.white),
             ),

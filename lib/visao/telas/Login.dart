@@ -133,22 +133,14 @@ class _LoginState extends State<Login> {
           padding: EdgeInsets.only(top: 40.0),
           child: Column(
             children: <Widget>[
-              SizedBox(height: 40),
-              Text(
-                Internacionalizacao.logoTitle,
-                style: TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                  color: Theme.of(context).primaryColorLight,
+              SizedBox(height: 20),
+              Center(
+                // qro q minha imagem de logo fique centralizada
+                child: Image.asset(
+                  "assets/imagens/logoPlanoCerto1.png",
+                  width: 250,
                 ),
               ),
-              Text(
-                Internacionalizacao.logoSubTitle,
-                style: TextStyle(
-                  color: Theme.of(context).primaryColorLight,
-                ),
-              ),
-              SizedBox(height: 60),
               Container(
                 padding: EdgeInsets.only(
                   left: 30,
@@ -161,16 +153,6 @@ class _LoginState extends State<Login> {
         ),
       ),
     );
-  }
-
-  static void _alterarParaCadastrar() {
-    _entrarActive = true;
-    _cadastrarActive = false;
-  }
-
-  static void _alterarParaEntrar() {
-    _entrarActive = false;
-    _cadastrarActive = true;
   }
 }
 

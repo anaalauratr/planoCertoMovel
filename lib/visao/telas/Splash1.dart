@@ -50,7 +50,7 @@ class _Splash1State extends State<Splash1> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Image.asset(
-              "assets/imagens/logoPlanoCerto1.png",
+              "assets/imagens/logoPlanoCerto1.png", //imagem de logo
               width: 350,
             ),
 

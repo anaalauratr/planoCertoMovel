@@ -54,7 +54,7 @@ class _PrincipalState extends State<Principal> {
   //barra de menu
   BottomNavigationBar _bottomNavigationBar() {
     return BottomNavigationBar(
-      backgroundColor: Color(0xFFF5F5DC),
+      backgroundColor: Color(0xFFF5F5DC), //cor do bottom
       currentIndex: _currentIndex!,
       onTap: (index) {
         setState(() {
@@ -71,7 +71,7 @@ class _PrincipalState extends State<Principal> {
         ),
         BottomNavigationBarItem(
           icon: Icon(
-            Icons.lunch_dining,
+            Icons.lunch_dining, //icones e cor do bottom navigator
             color: Color(0xFF95B634),
           ),
           label: Internacionalizacao.opt2,
@@ -88,6 +88,7 @@ class _PrincipalState extends State<Principal> {
   }
 }
 
+//mudei o texto e icones
 class Internacionalizacao {
   static String opt1 = "Inicio";
   static String opt2 = "Plano Alimentar";

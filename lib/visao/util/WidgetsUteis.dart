@@ -186,15 +186,9 @@ class WidgetsUteis {
             width: 100,
             child: CircularProgressIndicator(
               strokeWidth: 8.0,
-              valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF95B634)),
+              valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF95B634)), //deixei apenas uma barrra circular
             )),
-        Container(
-            height: 150,
-            width: 150,
-            child: CircularProgressIndicator(
-              strokeWidth: 8.0,
-              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-            )),
+
       ],
     );
   }
