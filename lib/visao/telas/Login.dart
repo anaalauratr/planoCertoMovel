@@ -157,11 +157,9 @@ class _LoginState extends State<Login> {
 }
 
 class Internacionalizacao {
-  static String logoTitle = "PLANOCERTO";
-  static String logoSubTitle = "TENHA ACESSO AS SUAS DIETAS";
+
 
   static String hintTextEmail = "Email";
   static String hintTextPassword = "Senha";
 
-  static String hintTextNewPassword = "Crie uma senha";
 }

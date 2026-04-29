@@ -123,7 +123,7 @@ class _TelaDoisState extends State<TelaDois> {
             //scroll
             child: Center(
               child: Padding(
-                padding: const EdgeInsets.all(16.0),
+                padding: EdgeInsets.all(16.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [

@@ -56,7 +56,7 @@ class _TelaHomeState extends State<TelaUm> {
                               Internacionalizacao.msg,
                               style: TextStyle(
                                 fontSize: 18.0,
-                                fontWeight: FontWeight.normal,
+                                fontWeight: FontWeight.bold,
                                 color: Color(0xFF95B634),
                               ),
                             ),
