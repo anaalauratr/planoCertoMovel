@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:login/visao/estilos/EstilosTexto.dart';
+import 'package:login/controle/RefeicaoController.dart';
+import 'package:login/modelo/Objects/refeicao.dart';
 
-import '../../modelo/ItemListView.dart';
 import '../util/WidgetsUteis.dart';
 
 class TelaDois extends StatefulWidget {
@@ -11,70 +12,113 @@ class TelaDois extends StatefulWidget {
 
   final String title;
 
-  @protected
   @override
   State<TelaDois> createState() => _TelaDoisState();
 }
 
 class _TelaDoisState extends State<TelaDois> {
-  //estado inicial das checkbox
-  bool concluida1 = false;
-  bool concluida2 = false;
-  bool concluida3 = false;
-  bool concluida4 = false;
+  List<Refeicao> refeicoes = [];
+  bool carregando = true;
 
-  void exibirRefeicao(
-    //funcao de quando eu clicar no item da lista vou poder ver os dados da refeicao
-    BuildContext context,
-    String nome, //variaveis que vou passar por parametro depois
-    String descricao,
-    String calorias,
-  ) {
+  @override
+  void initState() {
+    super.initState();
+    _carregarRefeicoes();
+  }
+
+  Future<void> _carregarRefeicoes() async {
+    await RefeicaoController.resetarRefeicoesSeNovoDia();
+
+    var lista = await RefeicaoController.carregarRefeicoes();
+
+    if (lista.isEmpty) {
+      lista = [
+        Refeicao(
+          id: 0,
+          nome: "Café da Manhã",
+          descricao: "Pão integral com ovo",
+          horario: "07:00",
+          calorias: 300,
+          planoAlimentarId: 0,
+        ),
+        Refeicao(
+          id: 1,
+          nome: "Lanche",
+          descricao: "Maçã",
+          horario: "10:00",
+          calorias: 180,
+          planoAlimentarId: 0,
+        ),
+        Refeicao(
+          id: 2,
+          nome: "Almoço",
+          descricao: "Arroz e frango",
+          horario: "12:30",
+          calorias: 550,
+          planoAlimentarId: 0,
+        ),
+        Refeicao(
+          id: 3,
+          nome: "Jantar",
+          descricao: "Sopa",
+          horario: "19:00",
+          calorias: 400,
+          planoAlimentarId: 0,
+        ),
+      ];
+
+      await RefeicaoController.salvarRefeicoes(lista);
+    }
+
+    setState(() {
+      refeicoes = lista;
+      carregando = false;
+    });
+  }
+//entender isso
+  Future<void> _alternarConcluida(Refeicao refeicao) async {
+    final novoValor = !refeicao.concluida;
+
+    await RefeicaoController.marcarConcluida(refeicao.id, novoValor,);
+
+    setState(() {
+      final index = refeicoes.indexWhere((r) => r.id == refeicao.id); //na msm posicao, id onde essa refeicao ta eu atualizo ela com o noco valor, q np caso é concluida = true
+
+      if (index != -1) {
+        refeicoes[index] = refeicoes[index].copyWith(concluida: novoValor);
+      }
+    });
+  }
+
+  void exibirRefeicao(BuildContext context, Refeicao refeicao) {
     showDialog(
-      //funcao que abre janela
-      context: context, //vai aparecer no meu contexto, na minha propria tela
-      builder: (BuildContext context) {
-        //conteudo dentro do dialog, oq aparece dentro dele
+      context: context,
+      builder: (BuildContext dialogContext) {
         return AlertDialog(
-          //pop-up ja vem com titulo, conteudo e botao pronto
           title: Text(
-            nome, //estilizacao do meu texto do nome da refeicao
-            style: TextStyle(
+            refeicao.nome,
+            style: const TextStyle(
               color: Color(0xFF7B9738),
-              fontWeight: FontWeight.bold, //negrito
+              fontWeight: FontWeight.bold,
             ),
           ),
           content: SizedBox(
-            //meu conteudo dentro do dialogo
             width: 400,
-            // controla largura do dialog, pra ficar maior que ele é normalmente
             child: Column(
               mainAxisSize: MainAxisSize.min,
-              //sem isso o dialog fica grande dms, ocupar o espaco apenas necessario
               crossAxisAlignment: CrossAxisAlignment.start,
-              //alinhar a esquerda
               children: [
                 Text(
-                  descricao,
-                  textAlign: TextAlign.left,
-                  // garante alinhamento a esquerda
-                  softWrap: true,
-                  // permite quebrar linha, caso oq estiver escrito seja maior
-                  style: TextStyle(
-                    fontWeight: FontWeight.normal,
+                  refeicao.descricao,
+                  style: const TextStyle(
                     fontSize: 18,
                     color: Color(0xFF95B634),
                   ),
                 ),
-                SizedBox(height: 10), //espaco vertical
+                const SizedBox(height: 10),
                 Text(
-                  calorias,
-                  textAlign: TextAlign.left,
-                  // garante alinhamento a esquerda
-                  softWrap: true,
-                  // permite quebrar linha, caso oq estiver escrito seja maior
-                  style: TextStyle(
-                    fontWeight: FontWeight.normal,
+                  "${refeicao.calorias} calorias",
+                  style: const TextStyle(
                     fontSize: 15,
                     color: Color(0xFF95B634),
                   ),
@@ -82,18 +126,33 @@ class _TelaDoisState extends State<TelaDois> {
               ],
             ),
           ),
-          actions: [
-            // acoes do dialog
+          actions: [ //entender isso
             TextButton(
-              //texto clicavel
               onPressed: () {
-                Navigator.pop(context); //quando for precionado fecha o alert
+                Navigator.pop(dialogContext);
+              },
+              child: const Text(
+                "Cancelar",
+                style: TextStyle(color: Colors.grey),
+              ),
+            ),
+            TextButton(
+              onPressed: refeicao.concluida
+                  ? null
+                  : () async {
+                await _alternarConcluida(refeicao);
+
+                if (!dialogContext.mounted) return;
+
+                Navigator.pop(dialogContext);
               },
               child: Text(
-                //texto do botao
-                "cancelar",
-                style: TextStyle(
-                  color: Colors.grey,
+                refeicao.concluida
+                    ? "Concluída"
+                    : "Marcar como concluída",
+                style: const TextStyle(
+                  color: Color(0xFF7B9738),
+                  fontWeight: FontWeight.bold,
                 ),
               ),
             ),
@@ -108,129 +167,73 @@ class _TelaDoisState extends State<TelaDois> {
     ScreenUtil.init(context, designSize: const Size(750, 1304));
 
     return Scaffold(
-        appBar: AppBar(
-          title: Text(
-            //app bar em baixo do outro (q tem em tds as paginas) com o titulo da pagina e sua estilizacao
-            Internacionalizacao.titulo,
-            style: EstilosTextosCustomizado.formField(context),
-          ),
+      appBar: AppBar(
+        title: Text(
+          Internacionalizacao.titulo,
+          style: EstilosTextosCustomizado.formField(context),
         ),
-        body: Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-          ),
-          child: SingleChildScrollView(
-            //scroll
-            child: Center(
-              child: Padding(
-                padding: EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    TextField(
-                      decoration: InputDecoration(
-                        hintStyle: TextStyle(
-                            color: Color(0xFF95B634),
-                            fontStyle: FontStyle.italic),
-                        hintText: 'Pesquise',
-                        border: OutlineInputBorder(),
-                        prefixIcon: Icon(
-                          Icons.search,
-                          color: Color(0xFF95B634),
+      ),
+      body: Container(
+        decoration: const BoxDecoration(color: Colors.white),
+        child: SingleChildScrollView(
+          child: Center(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+
+
+                  const SizedBox(height: 15),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.grey),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          Internacionalizacao.texto,
+                          style: EstilosTextosCustomizado.formField(context),
                         ),
-                      ),
-                    ),
-                    SizedBox(height: 15),
-                    Container(
-                      //conteiner para colocar informacoes do plano e dentro a listagem das refeicoes
-                      width: double.infinity,
-                      padding: EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.grey),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        //alinhado a esquerda
-                        children: [
-                          Text(
-                            Internacionalizacao.texto, //nome do plano
-                            style: EstilosTextosCustomizado.formField(context),
+                        const SizedBox(height: 4),
+                        Text(
+                          Internacionalizacao.descricao,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.normal,
+                            color: Colors.grey,
                           ),
-                          SizedBox(height: 4),
-                          Text(
-                            Internacionalizacao.descricao, //descricao do plano
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.normal,
-                              color: Colors.grey,
-                            ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          Internacionalizacao.datas,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.normal,
+                            color: Colors.grey,
                           ),
-                          SizedBox(height: 4),
-                          Text(
-                            Internacionalizacao.datas,
-                            //data de inicio e fim do plano
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.normal,
-                              color: Colors.grey,
-                            ),
-                          ),
-                          SizedBox(height: 15),
-                          //-------------------------------------------------------------------------------
-                          //listagem refeicoes do plano
-                          ListView(
-                            //serve para mostrar uma lista de elementos um em baixo do outro
+                        ),
+                        const SizedBox(height: 15),
+                        if (carregando)
+                          const Center(
+                            child: CircularProgressIndicator(),
+                          )
+                        else
+                          ListView.builder(
                             shrinkWrap: true,
-                            //o listview vai ocupar apenas o espaco que precisa, se ajusta aos seus itens, precisa dar dentro de um scroll
+                            physics: const NeverScrollableScrollPhysics(),
+                            itemCount: refeicoes.length,
+                            itemBuilder: (context, index) {
+                              final refeicao = refeicoes[index];
 
-                            children: [
-                              Card(
-                                //vem pronto para apresentar os itens de lista, comun nesses casos
-                                //cor der fundo
-                                color: Color(0xFFF5F5DC),
-                                //por padrao suas bordas ja vao arredondadas, porem eu quis colocar uma cor em sua borda
-                                //no  card nao existe a propriedade border
-
-                                shape: RoundedRectangleBorder(
-                                  //define o formato do card com bordas arredondadas
-                                  side: BorderSide(
-                                    //define uma borda, linha ao redor do card
-                                    color: Color(0xFF95B634),
-                                    width: 1, //expessura da borda fininha
-                                  ),
-                                  borderRadius: BorderRadius.circular(
-                                      8), //coloquei quanto eu qro mh borda arredondada
-                                ),
-
-                                child: ListTile(
-                                  title: Text("Cafe da Manha"),
-                                  subtitle: Text("07:00"),
-                                  //no trailing eu vou  criar um check box para controle das refeicoes concluidas
-                                  trailing: Checkbox(
-                                    value: concluida1,
-                                    //digo o estado atual da checkbox, criei ela la em cima
-                                    onChanged: (bool? valor) {
-                                      //qnd clica na checkbox, valor é o novo estado true ou false
-                                      setState(() {
-                                        //atualiza a tela e redesenha
-                                        concluida1 =
-                                            valor!; //muda o valor da variavel para oposto do q ele é
-                                        // ex concluida é true passa a ser false
-                                      });
-                                    },
-                                  ),
-                                  onTap: () {
-                                    //chamo a funcao de exibir refeicao e passo seus parametros
-                                    exibirRefeicao(context, "cafe da manha",
-                                        "ṕao com ovo", "300 calorias");
-                                  },
-                                ),
-                              ),
-                              Card(
-                                //cor der fundo
-                                color: Color(0xFFF5F5DC),
-                                //no  card nao existe a propriedade border
+                              return Card(
+                                color: refeicao.concluida
+                                    ? const Color(0xFFE3EFCB)
+                                    : const Color(0xFFF5F5DC),
                                 shape: RoundedRectangleBorder(
                                   side: const BorderSide(
                                     color: Color(0xFF95B634),
@@ -238,93 +241,34 @@ class _TelaDoisState extends State<TelaDois> {
                                   ),
                                   borderRadius: BorderRadius.circular(8),
                                 ),
-
                                 child: ListTile(
-                                  title: Text("Cafe da Manha"),
-                                  subtitle: Text("07:00"),
-                                  trailing: Checkbox(
-                                    value: concluida2,
-                                    onChanged: (bool? valor) {
-                                      setState(() {
-                                        concluida2 = valor!;
-                                      });
-                                    },
+                                  title: Text(refeicao.nome),
+                                  subtitle: Text(refeicao.horario),
+                                  trailing: refeicao.concluida
+                                      ? const Icon(
+                                    Icons.check_circle,
+                                    color: Color(0xFF7B9738),
+                                  )
+                                      : const Icon(
+                                    Icons.chevron_right,
+                                    color: Colors.grey,
                                   ),
-                                  onTap: () {
-                                    exibirRefeicao(context, "cafe da manha",
-                                        "ṕao com ovo", "300 calorias");
-                                  },
+                                  onTap: () =>
+                                      exibirRefeicao(context, refeicao),
                                 ),
-                              ),
-                              Card(
-                                //cor der fundo
-                                color: Color(0xFFF5F5DC),
-                                //no  card nao existe a propriedade border
-                                shape: RoundedRectangleBorder(
-                                  side: const BorderSide(
-                                    color: Color(0xFF95B634),
-                                    width: 1,
-                                  ),
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-
-                                child: ListTile(
-                                  title: Text("Cafe da Manha"),
-                                  subtitle: Text("07:00"),
-                                  trailing: Checkbox(
-                                    value: concluida3,
-                                    onChanged: (bool? valor) {
-                                      setState(() {
-                                        concluida3 = valor!;
-                                      });
-                                    },
-                                  ),
-                                  onTap: () {
-                                    exibirRefeicao(context, "cafe da manha",
-                                        "ṕao com ovo", "300 calorias");
-                                  },
-                                ),
-                              ),
-                              Card(
-                                //cor der fundo
-                                color: Color(0xFFF5F5DC),
-                                //no  card nao existe a propriedade border
-                                shape: RoundedRectangleBorder(
-                                  side: const BorderSide(
-                                    color: Color(0xFF95B634),
-                                    width: 1,
-                                  ),
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-
-                                child: ListTile(
-                                  title: Text("Cafe da Manha"),
-                                  subtitle: Text("07:00"),
-                                  trailing: Checkbox(
-                                    value: concluida4,
-                                    onChanged: (bool? valor) {
-                                      setState(() {
-                                        concluida4 = valor!;
-                                      });
-                                    },
-                                  ),
-                                  onTap: () {
-                                    exibirRefeicao(context, "cafe da manha",
-                                        "ṕao com ovo", "300 calorias");
-                                  },
-                                ),
-                              ),
-                            ],
+                              );
+                            },
                           ),
-                        ],
-                      ),
+                      ],
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
           ),
-        ));
+        ),
+      ),
+    );
   }
 }
 

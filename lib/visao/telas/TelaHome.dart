@@ -4,6 +4,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:login/modelo/ItemListView.dart';
 import 'package:login/visao/estilos/EstilosTexto.dart';
 import 'package:login/visao/util/WidgetsUteis.dart';
+import 'package:login/controle/RefeicaoController.dart';
+import 'package:login/modelo/Objects/refeicao.dart';
 
 class TelaUm extends StatefulWidget {
   const TelaUm({super.key, required this.title});
@@ -17,6 +19,29 @@ class TelaUm extends StatefulWidget {
 
 class _TelaHomeState extends State<TelaUm> {
   @override
+
+  List<Refeicao> refeicoesConcluidas = [];
+  bool carregando = true;
+
+
+  @override
+  void initState() {
+    super.initState();
+    carregarRefeicoesConcluidas();
+  }
+
+  Future<void> carregarRefeicoesConcluidas() async {
+    await RefeicaoController.resetarRefeicoesSeNovoDia();
+
+    final refeicoes = await RefeicaoController.carregarRefeicoes();
+
+    setState(() {
+      refeicoesConcluidas = refeicoes.where((r) => r.concluida).toList();
+
+      carregando = false;
+    });
+  }
+
   Widget build(BuildContext context) {
     ScreenUtil.init(context, designSize: const Size(750, 1304));
 
@@ -43,13 +68,7 @@ class _TelaHomeState extends State<TelaUm> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Center(
-                            // qro q minha imagem de logo fique centralizada
-                            child: Image.asset(
-                              "assets/imagens/logoPlanoCerto1.png",
-                              width: 250,
-                            ),
-                          ),
+
                           SizedBox(height: 4), //espaco vertical
                           Center(
                             child: Text(
@@ -85,57 +104,44 @@ class _TelaHomeState extends State<TelaUm> {
                                 SizedBox(height: 15),
 
                                 //listagem  de refeicoes concluidas
-                                ListView(
-                                  //serve para mostrar uma lista de elementos um em baixo do outro
-                                  shrinkWrap: true,
-                                  //o listview vai ocupar apenas o espaco que precisa, se ajusta aos seus itens, precisa dar dentro de um scroll
-
-                                  children: [
-                                    Card(
-                                      //vem pronto para apresentar os itens de lista, comun nesses casos
-                                      //cor der fundo
-                                      color: Color(0xFFF5F5DC),
-                                      //por padrao suas bordas ja vao arredondadas, porem eu quis colocar uma cor em sua borda
-                                      //no  card nao existe a propriedade border
-
-                                      shape: RoundedRectangleBorder(
-                                        //define o formato do card com bordas arredondadas
-                                        side: BorderSide(
-                                          //define uma borda, linha ao redor do card
-                                          color: Color(0xFF95B634),
-                                          width: 1, //expessura da borda fininha
-                                        ),
-                                        borderRadius: BorderRadius.circular(
-                                            8), //coloquei quanto eu qro mh borda arredondada
-                                      ),
-
-                                      child: ListTile(
-                                        //cria o item da lista
-                                        title: Text("Cafe da Manha"), //titulo
-                                        subtitle: Text("07:00"), //subtitulp
-                                        onTap: () {},
-                                      ),
+                                if (carregando)
+                                  const Center(
+                                    child: CircularProgressIndicator(),
+                                  )
+                                else if (refeicoesConcluidas.isEmpty)
+                                  const Center(
+                                    child: Text(
+                                      "Nenhuma refeição concluída hoje.",
                                     ),
-                                    Card(
-                                      //cor der fundo
-                                      color: Color(0xFFF5F5DC),
-                                      //no  card nao existe a propriedade border
-                                      shape: RoundedRectangleBorder(
-                                        side: const BorderSide(
-                                          color: Color(0xFF95B634),
-                                          width: 1,
-                                        ),
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
+                                  )
+                                else
+                                  ListView.builder(
+                                    shrinkWrap: true,
+                                    physics: const NeverScrollableScrollPhysics(),
+                                    itemCount: refeicoesConcluidas.length,
+                                    itemBuilder: (context, index) {
+                                      final refeicao = refeicoesConcluidas[index];
 
-                                      child: ListTile(
-                                        title: Text("Cafe da Manha"),
-                                        subtitle: Text("07:00"),
-                                        onTap: () {},
-                                      ),
-                                    ),
-                                  ],
-                                ),
+                                      return Card(
+                                        color: const Color(0xFFE3EFCB),
+                                        shape: RoundedRectangleBorder(
+                                          side: const BorderSide(
+                                            color: Color(0xFF95B634),
+                                            width: 1,
+                                          ),
+                                          borderRadius: BorderRadius.circular(8),
+                                        ),
+                                        child: ListTile(
+                                          leading: const Icon(
+                                            Icons.check_circle,
+                                            color: Color(0xFF7B9738),
+                                          ),
+                                          title: Text(refeicao.nome),
+                                          subtitle: Text(refeicao.horario),
+                                        ),
+                                      );
+                                    },
+                                  ),
                               ],
                             ),
                           ),
@@ -153,7 +159,7 @@ class _TelaHomeState extends State<TelaUm> {
 
 class Internacionalizacao {
   static String msg =
-      "Olá! Seja bem-vindo. Essas são suas refeições ja concluidas hoje!";
+      "Essas são suas refeições ja concluidas hoje!";
 
-  static String titulo1 = "Início";
+  static String titulo1 = "Concluídas";
 }

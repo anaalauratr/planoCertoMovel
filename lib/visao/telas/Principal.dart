@@ -23,10 +23,11 @@ class _PrincipalState extends State<Principal> {
   //variáveis
   int _currentIndex = 0;
 
-  List<Widget> _screens = [
-    new TelaUm(title: 'Primeira tela'),
-    new TelaDois(title: 'Segunda tela'),
-    new TelaTres(title: 'Terceira tela')
+
+  final List<Widget> _screens = [
+    TelaDois(title: 'Plano Alimentar'), // 0
+    TelaUm(title: 'Concluídas'),         // 1
+    TelaTres(title: 'Perfil'),           // 2
   ];
 
   @override
@@ -64,24 +65,26 @@ class _PrincipalState extends State<Principal> {
       items: [
         BottomNavigationBarItem(
           icon: Icon(
-            Icons.home,
+            Icons.lunch_dining,
             color: Color(0xFF95B634),
           ),
-          label: Internacionalizacao.opt1,
+          label: "Plano Alimentar",
         ),
+
         BottomNavigationBarItem(
           icon: Icon(
-            Icons.lunch_dining, //icones e cor do bottom navigator
+            Icons.check_circle,
             color: Color(0xFF95B634),
           ),
-          label: Internacionalizacao.opt2,
+          label: "Concluídas",
         ),
+
         BottomNavigationBarItem(
           icon: Icon(
             Icons.person,
             color: Color(0xFF95B634),
           ),
-          label: Internacionalizacao.opt3,
+          label: "Perfil",
         ),
       ],
     );
@@ -90,8 +93,6 @@ class _PrincipalState extends State<Principal> {
 
 //mudei o texto e icones
 class Internacionalizacao {
-  static String opt1 = "Inicio";
-  static String opt2 = "Plano Alimentar";
-  static String opt3 = "Perfil";
+
   static String titulo = "PlanoCerto";
 }

@@ -2,21 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:login/visao/telas/Splash2.dart';
-
-import 'package:login/visao/util/CustomIcons.dart';
-import 'package:login/visao/estilos/EstilosBotoes.dart';
 import 'package:login/visao/estilos/EstilosTexto.dart';
-import 'package:login/visao/telas/Principal.dart';
-import 'package:login/visao/util/SocialIcons.dart';
-import 'package:login/visao/util/WidgetsUteis.dart';
+import 'package:login/modelo/Objects/autorizacao.dart';
+import 'package:login/modelo/local_storage_service.dart';
 
-bool _entrarActive = false;
-bool _cadastrarActive = true;
 
-TextEditingController _emailController = TextEditingController();
-TextEditingController _passwordController = TextEditingController();
-TextEditingController _newEmailController = TextEditingController();
-TextEditingController _newPasswordController = TextEditingController();
+import 'package:login/controle/AutorizaController.dart';
+
 
 class Login extends StatefulWidget {
   const Login({super.key, required this.title});
@@ -27,139 +19,162 @@ class Login extends StatefulWidget {
   State<Login> createState() => _LoginState();
 }
 
+//classe atualizável da tela
 class _LoginState extends State<Login> {
-  telaSplash2(context) {
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => Splash2()),
-    );
-  }
+  // 1. Definição da FormKey para controlar a validação do formulário
+  final _formKey = GlobalKey<FormState>();
 
-  Widget _showEntrar(context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: <Widget>[
-        SizedBox(height: ScreenUtil().setHeight(30)),
-        TextField(
-          style: TextStyle(
-            color: Theme.of(context).primaryColorLight,
-          ),
-          controller: _emailController,
-          decoration: InputDecoration(
-            hintText: Internacionalizacao.hintTextEmail,
-            hintStyle: EstilosTextosCustomizado.formField(context),
-            enabledBorder: UnderlineInputBorder(
-              borderSide: BorderSide(
-                color: Theme.of(context).primaryColorLight,
-                width: 1.0,
-              ),
-            ),
-            focusedBorder: UnderlineInputBorder(
-              borderSide: BorderSide(
-                color: Theme.of(context).primaryColorLight,
-                width: 1.0,
-              ),
-            ),
-            prefixIcon: Icon(
-              Icons.email,
-              color: Theme.of(context).primaryColorLight,
-            ),
-          ),
-        ),
-        SizedBox(height: ScreenUtil().setHeight(50)),
-        TextField(
-          obscureText: true,
-          style: TextStyle(
-            color: Theme.of(context).primaryColorLight,
-          ),
-          controller: _passwordController,
-          decoration: InputDecoration(
-            hintText: Internacionalizacao.hintTextPassword,
-            hintStyle: EstilosTextosCustomizado.formField(context),
-            enabledBorder: UnderlineInputBorder(
-              borderSide: BorderSide(
-                color: Theme.of(context).primaryColorLight,
-                width: 1.0,
-              ),
-            ),
-            focusedBorder: UnderlineInputBorder(
-              borderSide: BorderSide(
-                color: Theme.of(context).primaryColorLight,
-                width: 1.0,
-              ),
-            ),
-            prefixIcon: Icon(
-              Icons.lock,
-              color: Theme.of(context).primaryColorLight,
-            ),
-          ),
-        ),
-        SizedBox(height: ScreenUtil().setHeight(80)),
-        ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Theme.of(context).primaryColorLight,
-          ),
-          onPressed: () {
-            telaSplash2(context);
-          },
-          child: Text(
-            "Acessar",
-            style: TextStyle(color: Colors.white),
-          ),
-        ),
-      ],
-    );
-  }
+  // 2. Definição dos Controladores para capturar e manipular o texto
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
 
   @override
+  void dispose() {
+    // IMPORTANTE: Sempre limpe os controladores para evitar vazamento de memória
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  /// Evento do botão entrar
+  void _enviarFormulario() async {
+    // 3. Validação do formulário usando a _formKey
+    if (_formKey.currentState!.validate()) {
+      // Se for válido, acessa o texto através dos controladores
+
+      //preparo o objeto para verificar autenticação
+      Autorizacao auth = Autorizacao(
+        usuario: _emailController.text,
+        senha: _passwordController.text,
+        token_autorizacao: '',
+      );
+
+      //verifico se o usuário e senha estão autenticados na API WEB
+      if (await AutorizaController.verificaAutorizacaoOnline(auth)) {
+        if (!mounted) return;
+        //envio um feedback ao usuário informando que o mesmo está autenticado
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Usuário autenticado: ${auth.usuario}')),
+        );
+
+        //passa para a próxima tela
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => Splash2()),
+        );
+      } else {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Usuário não autenticado!!!')),
+        );
+      }
+    }
+  }
+
+  //método de construção da interface da tela
+  @override
   Widget build(BuildContext context) {
-    SystemChrome.setPreferredOrientations([
-      DeviceOrientation.portraitUp,
-      DeviceOrientation.portraitDown,
-    ]);
-
-    ScreenUtil.init(
-      context,
-      designSize: const Size(750, 1304),
-    );
-
     return Scaffold(
-      resizeToAvoidBottomInset: true,
-      body: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-        ),
-        child: Padding(
-          padding: EdgeInsets.only(top: 40.0),
-          child: Column(
-            children: <Widget>[
-              SizedBox(height: 20),
-              Center(
-                // qro q minha imagem de logo fique centralizada
-                child: Image.asset(
-                  "assets/imagens/logoPlanoCerto1.png",
-                  width: 250,
+      appBar: AppBar(title: Text(widget.title)),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Center(
+              child: Image.asset(
+                "assets/imagens/logoPlanoCerto1.png",
+                width: 250,
+              ),
+            ),
+
+            const SizedBox(height: 30),
+
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    TextFormField(
+                      controller: _emailController,
+                      keyboardType: TextInputType.emailAddress,
+                      decoration: const InputDecoration(
+                        labelText: 'E-mail',
+                        enabledBorder: const OutlineInputBorder(
+                          borderSide: BorderSide(
+                            color: Color(0xFF95B634),
+                          ),
+                        ),
+                        focusedBorder: const OutlineInputBorder(
+                          borderSide: BorderSide(
+                            color: Color(0xFF95B634),
+                            width: 2,
+                          ),
+                        ),
+                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'É preciso inserir seu e-mail';
+                        }
+                        if (!value.contains('@')) {
+                          return 'O e-mail deve conter um @';
+                        }
+                        return null;
+                      },
+                    ),
+
+                    const SizedBox(height: 16),
+
+                    TextFormField(
+                      controller: _passwordController,
+                      obscureText: true,
+                      decoration: const InputDecoration(
+                        labelText: 'Senha',
+                        enabledBorder: const OutlineInputBorder(
+                          borderSide: BorderSide(
+                            color: Color(0xFF95B634),
+                          ),
+                        ),
+                        focusedBorder: const OutlineInputBorder(
+                          borderSide: BorderSide(
+                            color: Color(0xFF95B634),
+                            width: 2,
+                          ),
+                        ),
+                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Por favor, insira sua senha';
+                        }
+                        if (value.length < 6) {
+                          return 'A senha deve ter pelo menos 6 caracteres';
+                        }
+                        return null;
+                      },
+                    ),
+
+                    const SizedBox(height: 24),
+
+                    ElevatedButton(
+                      onPressed: _enviarFormulario,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF95B634),
+                        foregroundColor: Colors.white,
+                      ),
+                      child: const Text('Entrar'),
+                    ),
+                  ],
                 ),
               ),
-              Container(
-                padding: EdgeInsets.only(
-                  left: 30,
-                  right: 30,
-                ),
-                child: _showEntrar(context),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
+
+
+
     );
   }
-}
-
-class Internacionalizacao {
-
-
-  static String hintTextEmail = "Email";
-  static String hintTextPassword = "Senha";
-
 }
