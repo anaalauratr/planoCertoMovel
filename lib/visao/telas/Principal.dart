@@ -13,13 +13,12 @@ class _PrincipalState extends State<Principal> {
   //construção da estrutura
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return Scaffold( // vai ter em tds as telas, 1,2 e 3
         appBar: _appBar(),
         body: _screens[_currentIndex],
         bottomNavigationBar: _bottomNavigationBar());
   }
 
-  /////////////////////////
   //variáveis
   int _currentIndex = 0;
 

@@ -30,13 +30,13 @@ class _TelaHomeState extends State<TelaUm> {
     carregarRefeicoesConcluidas();
   }
 
-  Future<void> carregarRefeicoesConcluidas() async {
-    await RefeicaoController.resetarRefeicoesSeNovoDia();
+  Future<void> carregarRefeicoesConcluidas() async { //listo as refeicoes ja concluidas
+    await RefeicaoController.resetarRefeicoesSeNovoDia(); //se for um novo dia eu reseto as ref de concluids = true, para = false e atualizo
 
-    final refeicoes = await RefeicaoController.carregarRefeicoes();
+    final refeicoes = await RefeicaoController.carregarRefeicoes(); //carrego as reicoes
 
     setState(() {
-      refeicoesConcluidas = refeicoes.where((r) => r.concluida).toList();
+      refeicoesConcluidas = refeicoes.where((r) => r.concluida).toList(); //salvo na variavel as q concluiida = true
 
       carregando = false;
     });
@@ -97,25 +97,24 @@ class _TelaHomeState extends State<TelaUm> {
                               children: [
                                 Text(
                                   "Nome do plano",
-                                  style: EstilosTextosCustomizado.formField(
-                                      context),
+                                  style: EstilosTextosCustomizado.formField(context),
                                 ),
 
                                 SizedBox(height: 15),
 
                                 //listagem  de refeicoes concluidas
-                                if (carregando)
+                                if (carregando) //se ainda tiver carregando mostro barra de progresso
                                   const Center(
                                     child: CircularProgressIndicator(),
                                   )
-                                else if (refeicoesConcluidas.isEmpty)
+                                else if (refeicoesConcluidas.isEmpty) //se variavel tiver vazia mostro essa msg
                                   const Center(
                                     child: Text(
                                       "Nenhuma refeição concluída hoje.",
                                     ),
                                   )
                                 else
-                                  ListView.builder(
+                                  ListView.builder( //list view das concluidas
                                     shrinkWrap: true,
                                     physics: const NeverScrollableScrollPhysics(),
                                     itemCount: refeicoesConcluidas.length,
@@ -126,17 +125,17 @@ class _TelaHomeState extends State<TelaUm> {
                                         color: const Color(0xFFE3EFCB),
                                         shape: RoundedRectangleBorder(
                                           side: const BorderSide(
-                                            color: Color(0xFF95B634),
+                                            color: Color(0xFF95B634), //como sao concluidas sua cor de funfo é verde
                                             width: 1,
                                           ),
                                           borderRadius: BorderRadius.circular(8),
                                         ),
                                         child: ListTile(
                                           leading: const Icon(
-                                            Icons.check_circle,
+                                            Icons.check_circle, //icone de concluida
                                             color: Color(0xFF7B9738),
                                           ),
-                                          title: Text(refeicao.nome),
+                                          title: Text(refeicao.nome), //dados da refeicao
                                           subtitle: Text(refeicao.horario),
                                         ),
                                       );

@@ -27,11 +27,11 @@ class _TelaDoisState extends State<TelaDois> {
   }
 
   Future<void> _carregarRefeicoes() async {
-    await RefeicaoController.resetarRefeicoesSeNovoDia();
+    await RefeicaoController.resetarRefeicoesSeNovoDia(); //verifica se novo dia cmc, pra resetar e atualizar as refeicoes concluidas, para false
 
     var lista = await RefeicaoController.carregarRefeicoes();
 
-    if (lista.isEmpty) {
+    if (lista.isEmpty) { //se vazio cria essas refeicoes
       lista = [
         Refeicao(
           id: 0,
@@ -72,31 +72,31 @@ class _TelaDoisState extends State<TelaDois> {
 
     setState(() {
       refeicoes = lista;
-      carregando = false;
+      carregando = false; //terminou o carregamento, isso é para reconstruir a tela e atualizar
     });
   }
-//entender isso
-  Future<void> _alternarConcluida(Refeicao refeicao) async {
-    final novoValor = !refeicao.concluida;
 
-    await RefeicaoController.marcarConcluida(refeicao.id, novoValor,);
+  Future<void> _alternarConcluida(Refeicao refeicao) async { //vai receber uma refeicao
+    final novoValor = !refeicao.concluida; //vai pegar o valor da sua concluida(true ou false) e salvar o posto no novo valor
+
+    await RefeicaoController.marcarConcluida(refeicao.id, novoValor,); //salvo novovalor
 
     setState(() {
       final index = refeicoes.indexWhere((r) => r.id == refeicao.id); //na msm posicao, id onde essa refeicao ta eu atualizo ela com o noco valor, q np caso é concluida = true
 
-      if (index != -1) {
-        refeicoes[index] = refeicoes[index].copyWith(concluida: novoValor);
+      if (index != -1) { //se ele encontrar essa posicap
+        refeicoes[index] = refeicoes[index].copyWith(concluida: novoValor); //pegp a ref q tava nessa posicao e substituo por uma copia dela com o valor atualizado
       }
     });
   }
 
-  void exibirRefeicao(BuildContext context, Refeicao refeicao) {
-    showDialog(
+  void exibirRefeicao(BuildContext context, Refeicao refeicao) { //refeicao q o usuario clicou
+    showDialog( //abro uma janelinha
       context: context,
       builder: (BuildContext dialogContext) {
         return AlertDialog(
           title: Text(
-            refeicao.nome,
+            refeicao.nome, //nome da refeicao
             style: const TextStyle(
               color: Color(0xFF7B9738),
               fontWeight: FontWeight.bold,
@@ -109,7 +109,7 @@ class _TelaDoisState extends State<TelaDois> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  refeicao.descricao,
+                  refeicao.descricao, //descricao da refeicao
                   style: const TextStyle(
                     fontSize: 18,
                     color: Color(0xFF95B634),
@@ -117,7 +117,7 @@ class _TelaDoisState extends State<TelaDois> {
                 ),
                 const SizedBox(height: 10),
                 Text(
-                  "${refeicao.calorias} calorias",
+                  "${refeicao.calorias} calorias", //caloria da refeicao
                   style: const TextStyle(
                     fontSize: 15,
                     color: Color(0xFF95B634),
@@ -126,10 +126,10 @@ class _TelaDoisState extends State<TelaDois> {
               ],
             ),
           ),
-          actions: [ //entender isso
+          actions: [ //botoes e acoes
             TextButton(
               onPressed: () {
-                Navigator.pop(dialogContext);
+                Navigator.pop(dialogContext); //qnd clicar em cancelar fecha
               },
               child: const Text(
                 "Cancelar",
@@ -138,17 +138,17 @@ class _TelaDoisState extends State<TelaDois> {
             ),
             TextButton(
               onPressed: refeicao.concluida
-                  ? null
-                  : () async {
+                  ? null //se a refeicao ja tover concluida desabilito o botao
+                  : () async { //se n qnd a pessoa clocar eu chamo a funcao pra alternar
                 await _alternarConcluida(refeicao);
 
-                if (!dialogContext.mounted) return;
+                if (!dialogContext.mounted) return; //verifica se o dialog ainda ta na tela
 
-                Navigator.pop(dialogContext);
+                Navigator.pop(dialogContext); //dps de marcar fecha
               },
               child: Text(
                 refeicao.concluida
-                    ? "Concluída"
+                    ? "Concluída" //se concluidan = true mostro a msg q n posso marcar
                     : "Marcar como concluída",
                 style: const TextStyle(
                   color: Color(0xFF7B9738),
@@ -166,7 +166,7 @@ class _TelaDoisState extends State<TelaDois> {
   Widget build(BuildContext context) {
     ScreenUtil.init(context, designSize: const Size(750, 1304));
 
-    return Scaffold(
+    return Scaffold( //fornece a estrutura basica da tela
       appBar: AppBar(
         title: Text(
           Internacionalizacao.titulo,
@@ -175,7 +175,7 @@ class _TelaDoisState extends State<TelaDois> {
       ),
       body: Container(
         decoration: const BoxDecoration(color: Colors.white),
-        child: SingleChildScrollView(
+        child: SingleChildScrollView( //rolavel
           child: Center(
             child: Padding(
               padding: const EdgeInsets.all(16.0),
@@ -196,12 +196,12 @@ class _TelaDoisState extends State<TelaDois> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          Internacionalizacao.texto,
+                          Internacionalizacao.texto, //nome do plano
                           style: EstilosTextosCustomizado.formField(context),
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          Internacionalizacao.descricao,
+                          Internacionalizacao.descricao, //descricao dp plano
                           style: const TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.normal,
@@ -210,7 +210,7 @@ class _TelaDoisState extends State<TelaDois> {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          Internacionalizacao.datas,
+                          Internacionalizacao.datas, // data de inicio e fim
                           style: const TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.normal,
@@ -218,21 +218,21 @@ class _TelaDoisState extends State<TelaDois> {
                           ),
                         ),
                         const SizedBox(height: 15),
-                        if (carregando)
+                        if (carregando) //se tiver carregando os dados vai mostrar uma barra de progresso
                           const Center(
                             child: CircularProgressIndicator(),
                           )
-                        else
-                          ListView.builder(
+                        else //se n tiver lista as ref
+                          ListView.builder( //list view com a qnt de refeicoes q tiver
                             shrinkWrap: true,
                             physics: const NeverScrollableScrollPhysics(),
-                            itemCount: refeicoes.length,
-                            itemBuilder: (context, index) {
+                            itemCount: refeicoes.length, //tamho vai depender da lista de refeicoes
+                            itemBuilder: (context, index) { //posicao atual. da refeocao
                               final refeicao = refeicoes[index];
 
-                              return Card(
+                              return Card( //ref mostrada dentro de um card
                                 color: refeicao.concluida
-                                    ? const Color(0xFFE3EFCB)
+                                    ? const Color(0xFFE3EFCB) //se a ref concluida usa essa cor
                                     : const Color(0xFFF5F5DC),
                                 shape: RoundedRectangleBorder(
                                   side: const BorderSide(
@@ -242,19 +242,20 @@ class _TelaDoisState extends State<TelaDois> {
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: ListTile(
+                                  //dados da ref
                                   title: Text(refeicao.nome),
                                   subtitle: Text(refeicao.horario),
-                                  trailing: refeicao.concluida
-                                      ? const Icon(
+                                  trailing: refeicao.concluida //canto direito
+                                      ? const Icon( //se concluida = true vai mostrar check
                                     Icons.check_circle,
                                     color: Color(0xFF7B9738),
                                   )
                                       : const Icon(
-                                    Icons.chevron_right,
+                                    Icons.chevron_right, //se n setinha
                                     color: Colors.grey,
                                   ),
                                   onTap: () =>
-                                      exibirRefeicao(context, refeicao),
+                                      exibirRefeicao(context, refeicao), //se eu clicar nela mostro os dados com showDilog
                                 ),
                               );
                             },

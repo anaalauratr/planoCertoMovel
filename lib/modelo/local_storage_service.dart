@@ -5,7 +5,7 @@ import 'dart:convert';
 
 class LocalStorageService {
   //Constantes que indicam a chave shared em que o dado será persistido
-  static const String LISTA_PRODUTOS = 'lista_produtos';
+
   static const String AUTORIZACAO = 'autorizacao';
 
   // Salvar a autorizacao
