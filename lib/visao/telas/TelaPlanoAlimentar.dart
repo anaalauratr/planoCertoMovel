@@ -4,6 +4,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:login/visao/estilos/EstilosTexto.dart';
 import 'package:login/controle/RefeicaoController.dart';
 import 'package:login/modelo/Objects/refeicao.dart';
+import 'package:login/modelo/local_storage_service.dart';
+import 'package:intl/intl.dart';
 
 import '../util/WidgetsUteis.dart';
 
@@ -19,6 +21,10 @@ class TelaDois extends StatefulWidget {
 class _TelaDoisState extends State<TelaDois> {
   List<Refeicao> refeicoes = [];
   bool carregando = true;
+  String nomePlano = '';
+  String descricaoPlano = '';
+  String dataInicio = '';
+  String dataFim = '';
 
   @override
   void initState() {
@@ -27,53 +33,45 @@ class _TelaDoisState extends State<TelaDois> {
   }
 
   Future<void> _carregarRefeicoes() async {
-    await RefeicaoController.resetarRefeicoesSeNovoDia(); //verifica se novo dia cmc, pra resetar e atualizar as refeicoes concluidas, para false
+    await RefeicaoController.resetarRefeicoesSeNovoDia();
 
-    var lista = await RefeicaoController.carregarRefeicoes();
+    final auth = await LocalStorageService.carregarAutorizacao();
 
-    if (lista.isEmpty) { //se vazio cria essas refeicoes
-      lista = [
-        Refeicao(
-          id: 0,
-          nome: "Café da Manhã",
-          descricao: "Pão integral com ovo",
-          horario: "07:00",
-          calorias: 300,
-          planoAlimentarId: 0,
-        ),
-        Refeicao(
-          id: 1,
-          nome: "Lanche",
-          descricao: "Maçã",
-          horario: "10:00",
-          calorias: 180,
-          planoAlimentarId: 0,
-        ),
-        Refeicao(
-          id: 2,
-          nome: "Almoço",
-          descricao: "Arroz e frango",
-          horario: "12:30",
-          calorias: 550,
-          planoAlimentarId: 0,
-        ),
-        Refeicao(
-          id: 3,
-          nome: "Jantar",
-          descricao: "Sopa",
-          horario: "19:00",
-          calorias: 400,
-          planoAlimentarId: 0,
-        ),
-      ];
+    if (auth != null) {
+      await RefeicaoController.carregarPlanoDaApi(
+        auth.token_autorizacao,
+      );
 
-      await RefeicaoController.salvarRefeicoes(lista);
+      final plano = RefeicaoController.dadosPlano;
+
+      if (plano != null) {
+        Internacionalizacao.texto = plano['nome'] ?? '';
+        Internacionalizacao.descricao = plano['descricao'] ?? '';
+
+        final dataInicio = DateTime.parse(plano['data_inicio']);
+        final dataFim = DateTime.parse(plano['data_fim']);
+
+        final dataInicioFormatada =
+        DateFormat('dd/MM/yyyy').format(dataInicio);
+
+        final dataFimFormatada =
+        DateFormat('dd/MM/yyyy').format(dataFim);
+
+        Internacionalizacao.datas =
+        'Data de início: $dataInicioFormatada | Fim: $dataFimFormatada';
+      }
+
+      final lista = await RefeicaoController.carregarRefeicoes();
+
+      setState(() {
+        refeicoes = lista;
+        carregando = false;
+      });
+    } else {
+      setState(() {
+        carregando = false;
+      });
     }
-
-    setState(() {
-      refeicoes = lista;
-      carregando = false; //terminou o carregamento, isso é para reconstruir a tela e atualizar
-    });
   }
 
   Future<void> _alternarConcluida(Refeicao refeicao) async { //vai receber uma refeicao
@@ -274,8 +272,8 @@ class _TelaDoisState extends State<TelaDois> {
 }
 
 class Internacionalizacao {
-  static String texto = "Nome do plano alimentar";
-  static String descricao = "Esse plano alimentar tem intuito de... ";
-  static String datas = "Data de início: 06/04/2025. Fim 06/06/2025";
+  static String texto = "Nome do plano:";
+  static String descricao = "Descrição";
+  static String datas = "Data de inicio e fim";
   static String titulo = "Planos Alimentares";
 }

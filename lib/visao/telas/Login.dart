@@ -38,35 +38,45 @@ class _LoginState extends State<Login> {
 
   /// Evento do botão entrar
   void _enviarFormulario() async {
-    // 3. Validação do formulário usando a _formKey
     if (_formKey.currentState!.validate()) {
-      // Se for válido, acessa o texto através dos controladores
 
-      //preparo o objeto para verificar autenticação
       Autorizacao auth = Autorizacao(
         usuario: _emailController.text,
         senha: _passwordController.text,
         token_autorizacao: '',
       );
 
-      //verifico se o usuário e senha estão autenticados na API WEB
-      if (await AutorizaController.verificaAutorizacaoOnline(auth)) {
-        if (!mounted) return;
-        //envio um feedback ao usuário informando que o mesmo está autenticado
+      String? mensagem =
+      await AutorizaController.verificaAutorizacaoOnline(auth);
+
+      if (!mounted) return;
+
+      if (mensagem == null) {
+
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Usuário autenticado: ${auth.usuario}')),
+          SnackBar(
+            content: Text(
+              'Usuário autenticado: ${auth.usuario}',
+            ),
+          ),
         );
 
-        //passa para a próxima tela
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => Splash2()),
+          MaterialPageRoute(
+            builder: (context) => Splash2(),
+          ),
         );
+
       } else {
-        if (!mounted) return;
+
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Usuário não autenticado!!!')),
+          SnackBar(
+            content: Text(mensagem),
+            backgroundColor: Colors.red,
+          ),
         );
+
       }
     }
   }

@@ -158,7 +158,7 @@ class _TelaHomeState extends State<TelaUm> {
 
 class Internacionalizacao {
   static String msg =
-      "Essas são suas refeições ja concluidas hoje!";
+      "Essas são suas refeições já concluídas hoje!";
 
   static String titulo1 = "Concluídas";
 }
